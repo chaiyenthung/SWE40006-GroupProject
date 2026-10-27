@@ -260,12 +260,12 @@ nav{
 </head>
 <body>
 <nav>
-  <a class="logo" href="/">🛒 ACE Mart</a>
+  <a class="logo" href="/">ACE Mart</a>
   <a class="back-btn" href="/">← Keep Shopping</a>
 </nav>
 
 <div class="page">
-  <div class="page-title">Your Cart 🛒</div>
+  <div class="page-title">Your Cart</div>
   <div class="page-sub">{{ customer.username }} &nbsp;·&nbsp; {{ cart.item_count() }} item(s)</div>
 
   {% if cart.items %}
@@ -331,14 +331,14 @@ nav{
     </div>
     <div class="summary-row">
       <span>Shipping</span>
-      <span id="shipping">{% if cart.total() >= 25 %}<span style="color:var(--green);font-weight:700">FREE 🎉</span>{% else %}$3.99{% endif %}</span>
+      <span id="shipping">{% if cart.total() >= 25 %}<span style="color:var(--green);font-weight:700">FREE</span>{% else %}$3.99{% endif %}</span>
     </div>
     <div class="summary-row total">
       <span>Total</span>
       <span id="grand-total">${{ "%.2f"|format(cart.total() + (0 if cart.total() >= 25 else 3.99)) }}</span>
     </div>
     <button class="checkout-btn" id="checkout-btn" onclick="checkout()">
-      🎉 Place Order — $<span id="btn-total">{{ "%.2f"|format(cart.total() + (0 if cart.total() >= 25 else 3.99)) }}</span>
+      Place Order — $<span id="btn-total">{{ "%.2f"|format(cart.total() + (0 if cart.total() >= 25 else 3.99)) }}</span>
     </button>
   </div>
 
@@ -355,7 +355,6 @@ nav{
 <!-- ── SUCCESS MODAL ── -->
 <div class="modal-bg" id="modal-success">
   <div class="modal">
-    <div class="big">🎉</div>
     <h3>Order Confirmed!</h3>
     <p id="success-msg">Your snacks are being packed and will be on their way soon!</p>
     <div style="font-size:.78rem;color:var(--muted);margin-bottom:1.25rem;" id="success-details"></div>
@@ -366,7 +365,7 @@ nav{
 <!-- ── PAYMENT GATEWAY MODAL ── -->
 <div class="modal-bg" id="modal-payment">
   <div class="pay-modal">
-    <div class="pay-title">💳 Payment</div>
+    <div class="pay-title">Payment</div>
 
     <!-- Amount due -->
     <div class="pay-amount">
@@ -376,14 +375,14 @@ nav{
 
     <!-- Demo hint -->
     <div class="demo-hint">
-      💡 <strong>Demo:</strong> Use any details to pay. Enter card <code>0000 0000 0000 0000</code>
+      <strong>Demo:</strong> Use any details to pay. Enter card <code>0000 0000 0000 0000</code>
       or wallet ID <code>fail</code> to simulate a <strong>declined</strong> transaction.
     </div>
 
     <!-- Method tabs -->
     <div class="pay-tabs" id="pay-tabs">
-      <button class="pay-tab active" id="tab-cc"  onclick="setPayTab('cc')">💳 Credit Card</button>
-      <button class="pay-tab"        id="tab-ew"  onclick="setPayTab('ew')">📱 E-Wallet</button>
+      <button class="pay-tab active" id="tab-cc"  onclick="setPayTab('cc')">Credit Card</button>
+      <button class="pay-tab"        id="tab-ew"  onclick="setPayTab('ew')">E-Wallet</button>
     </div>
 
     <!-- Credit Card panel -->
@@ -443,7 +442,7 @@ nav{
 
     <div id="pay-form-actions">
       <button class="pay-submit" id="pay-submit-btn" onclick="submitPayment()">
-        🔒 Pay Now
+        Pay Now
       </button>
       <button class="pay-cancel" onclick="closePayModal()">Cancel</button>
     </div>
@@ -550,7 +549,7 @@ function refreshTotals(subtotal) {
   document.getElementById('grand-total').textContent = '$' + grand.toFixed(2);
   document.getElementById('btn-total').textContent   = grand.toFixed(2);
   document.getElementById('shipping').innerHTML = shipping === 0
-    ? '<span style="color:var(--green);font-weight:700">FREE 🎉</span>'
+    ? '<span style="color:var(--green);font-weight:700">FREE</span>'
     : '$3.99';
 }
 
@@ -642,18 +641,18 @@ async function checkout() {
       document.getElementById('pay-total').textContent = '$' + parseFloat(data.total).toFixed(2);
       openPayModal();
       btn.disabled = false;
-      btn.innerHTML = '🎉 Place Order — $<span id="btn-total">' + parseFloat(data.total).toFixed(2) + '</span>';
+      btn.innerHTML = 'Place Order — $<span id="btn-total">' + parseFloat(data.total).toFixed(2) + '</span>';
     } else {
       const errMsg = data.error || 'Something went wrong';
-      btn.innerHTML = '❌ ' + errMsg;
+      btn.innerHTML = errMsg;
       setTimeout(() => {
         btn.disabled = false;
-        btn.innerHTML = '🎉 Place Order — $<span id="btn-total">' + savedTotal + '</span>';
+        btn.innerHTML = 'Place Order — $<span id="btn-total">' + savedTotal + '</span>';
       }, 2500);
     }
   } catch(e) {
     btn.disabled = false;
-    btn.innerHTML = '🎉 Place Order — $<span id="btn-total">' + savedTotal + '</span>';
+    btn.innerHTML = 'Place Order — $<span id="btn-total">' + savedTotal + '</span>';
     console.error("Checkout failed:", e);
     alert("A connection or server error occurred. Please try again.");
   }
@@ -669,7 +668,7 @@ function closePayModal() {
   const btn = document.getElementById('checkout-btn');
   btn.disabled = false;
   const grand = (document.getElementById('grand-total') || {}).textContent || '';
-  btn.innerHTML = '🎉 Place Order — $<span id="btn-total">' + grand.replace('$','') + '</span>';
+  btn.innerHTML = 'Place Order — $<span id="btn-total">' + grand.replace('$','') + '</span>';
 }
 
 function setPayTab(tab) {
@@ -688,7 +687,7 @@ function resetPayModal() {
   document.getElementById('panel-ew').style.display = '';
   document.getElementById('pay-tabs').style.display = '';
   const btn = document.getElementById('pay-submit-btn');
-  btn.disabled = false; btn.innerHTML = '🔒 Pay Now';
+  btn.disabled = false; btn.innerHTML = 'Pay Now';
   clearPayErrors();
 }
 
@@ -751,8 +750,8 @@ async function submitPayment() {
     if (data.success) {
       document.getElementById('modal-payment').classList.remove('show');
       document.getElementById('success-details').innerHTML =
-        '🧾 Invoice: <code>' + (data.invoice_id||'').substring(0,8).toUpperCase() + '</code>' +
-        '&nbsp;&nbsp;🚚 Tracking: <code>' + (data.tracking||'N/A') + '</code>';
+        'Invoice: <code>' + (data.invoice_id||'').substring(0,8).toUpperCase() + '</code>' +
+        '&nbsp;&nbsp;Tracking: <code>' + (data.tracking||'N/A') + '</code>';
       document.getElementById('modal-success').classList.add('show');
     } else {
       document.getElementById('pay-declined').style.display = 'block';
@@ -764,7 +763,7 @@ async function submitPayment() {
         data.error || 'Payment declined. Please try a different method.';
     }
   } catch(e) {
-    btn.disabled = false; btn.innerHTML = '🔒 Pay Now';
+    btn.disabled = false; btn.innerHTML = 'Pay Now';
   }
 }
 </script>

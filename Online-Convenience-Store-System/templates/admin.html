@@ -207,20 +207,22 @@ nav{
 <body>
 
 <nav>
-  <a class="logo" href="/">🛒 ACE Mart</a>
-  <span class="admin-badge">⚙️ Admin Panel</span>
+  <a class="logo" href="/">ACE Mart</a>
+  <span class="admin-badge">Admin Panel</span>
   <div class="nav-right">
-    <a class="nav-link" href="/" style="font-weight:700;color:var(--orange);border:2px solid var(--border);padding:.5rem 1rem;border-radius:99px;">🛍️ Customer View</a>
-    <a class="nav-link" href="/profile">👤 Profile</a>
+    <a class="nav-link" href="/" style="font-weight:700;color:var(--orange);border:2px solid var(--border);padding:.5rem 1rem;border-radius:99px;">Customer View</a>
+    <a class="nav-link" href="/profile">Profile</a>
     <!-- Real-time Context-Aware Notification Bell -->
-    <div style="position:relative;cursor:pointer;margin-right:1rem;" id="bell-wrapper">
-      <span style="font-size:1.4rem;" onclick="toggleAlertsDropdown(event)">🔔</span>
+    <div style="position:relative;cursor:pointer;margin-right:1rem;display:inline-flex;align-items:center;" id="bell-wrapper">
+      <span onclick="toggleAlertsDropdown(event)" style="display:inline-flex;align-items:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      </span>
       <span id="admin-notif-badge" style="display:none;position:absolute;top:-4px;right:-6px;background:var(--red);color:#fff;font-size:.65rem;font-weight:700;border-radius:99px;padding:.1rem .35rem;min-width:18px;text-align:center;" onclick="toggleAlertsDropdown(event)">0</span>
       
       <!-- Notification Dropdown Menu -->
       <div id="admin-notif-dropdown" style="display:none;position:absolute;top:38px;right:0;width:300px;background:var(--surface);border:2px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:150;padding:.75rem 1rem;">
         <div style="font-family:'Righteous',cursive;font-size:.95rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;">
-          <span id="notif-title-lbl">🔔 Notifications</span>
+          <span id="notif-title-lbl">Notifications</span>
           <button style="background:none;border:none;color:var(--orange);font-size:.72rem;font-weight:700;cursor:pointer;" onclick="markAlertsAsRead(event)">Mark all read</button>
         </div>
         <div id="admin-notif-list" style="max-height:220px;overflow-y:auto;font-size:.82rem;display:flex;flex-direction:column;gap:.35rem;">

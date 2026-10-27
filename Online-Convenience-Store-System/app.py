@@ -24,7 +24,7 @@ SNACK_PRODUCTS = [
     ("p-001", "Truffle Chips",        "Black truffle & sea salt kettle chips",      4.99,  80, "🍟", "chips"),
     ("p-002", "Mango Chili Gummies",  "Sweet-heat mango gummy bears",               3.49, 120, "🥭", "candy"),
     ("p-003", "Matcha Pocky",         "Japanese matcha cream biscuit sticks",       2.99,  95, "🍵", "biscuits"),
-    ("p-004", "Ghost Pepper Puffs",   "Dangerously spicy corn puffs",               3.99,  60, "🌶️", "chips"),
+    ("p-004", "Ghost Pepper Puffs",   "Dangerously spicy corn puffs",               3.99,   3, "🌶️", "chips"),
     ("p-005", "Birthday Cake Oreos",  "Limited edition birthday cake filling",      4.49,  45, "🎂", "biscuits"),
     ("p-006", "Salted Caramel Nuts",  "Mixed nuts in salted caramel glaze",         6.99,  70, "🥜", "nuts"),
     ("p-007", "Watermelon Sour Belts","Chewy sour watermelon candy strips",         2.49, 150, "🍉", "candy"),
@@ -104,7 +104,7 @@ def save_state_to_db():
     }
     
     # 6. Serialize Reports
-    reports_data = [r.to_dict() for r in mgr.reports]  # <-- Add this line
+    reports_data = [r.to_dict() for r in mgr.reports]
     
     conn = get_db_connection()
     try:
@@ -115,7 +115,7 @@ def save_state_to_db():
         cursor.execute(sql, ("accounts", json.dumps(accounts_data)))
         cursor.execute(sql, ("orders", json.dumps(orders_data)))
         cursor.execute(sql, ("alerts", json.dumps(alerts_data)))
-        cursor.execute(sql, ("reports", json.dumps(reports_data)))  # <-- Add this line
+        cursor.execute(sql, ("reports", json.dumps(reports_data)))
         conn.commit()
     except Exception as e:
         print("Failed to save state to SQLite database:", e)
@@ -181,10 +181,15 @@ def load_state_from_db() -> bool:
                 for item_dict in cart_data["items"]:
                     p = products.get(item_dict["product_id"])
                     if p:
-                        cart.items[p.product_id] = CartItem(p, item_dict["quantity"])  # <-- Rebuild CartItem
+                        cart.items[p.product_id] = CartItem(p, item_dict["quantity"])
             
         acc.account_id = a_dict["account_id"]
         acc.password_hash = a_dict["password_hash"]
+        if a_dict.get("created_at"):
+            try:
+                acc.created_at = datetime.fromisoformat(a_dict["created_at"])
+            except Exception:
+                pass
         accounts[email] = acc
         
     # 4. Reconstruct Orders, Invoices, Payments, Shipments, and Feedbacks
@@ -202,6 +207,11 @@ def load_state_from_db() -> bool:
         order = Order(o_dict["order_id"], customer, order_items)
         order.status = o_dict["status"]
         order.total_amount = o_dict["total_amount"]
+        if o_dict.get("placed_at"):
+            try:
+                order.placed_at = datetime.fromisoformat(o_dict["placed_at"])
+            except Exception:
+                pass
         
         if o_dict.get("invoice_id"):
             order.generate_invoice()
@@ -222,12 +232,27 @@ def load_state_from_db() -> bool:
         for s_dict in o_dict.get("shipments", []):
             ship = Shipment(s_dict["shipment_id"], order, s_dict["carrier"], s_dict["tracking_number"], s_dict["destination_address"])
             ship.status = s_dict["status"]
+            if s_dict.get("shipped_at"):
+                try:
+                    ship.shipped_at = datetime.fromisoformat(s_dict["shipped_at"])
+                except Exception:
+                    pass
+            if s_dict.get("delivered_at"):
+                try:
+                    ship.delivered_at = datetime.fromisoformat(s_dict["delivered_at"])
+                except Exception:
+                    pass
             order.shipments.append(ship)
             
         if o_dict.get("feedback"):
             f_dict = o_dict["feedback"]
             order.receive_feedback(f_dict["rating"], f_dict["comment"])
             order.feedback.feedback_id = f_dict["feedback_id"]
+            if f_dict.get("submitted_at"):
+                try:
+                    order.feedback.submitted_at = datetime.fromisoformat(f_dict["submitted_at"])
+                except Exception:
+                    pass
             customer.feedback_list.append(order.feedback)
             
         customer.orders.append(order)
@@ -243,6 +268,16 @@ def load_state_from_db() -> bool:
             ticket.ticket_id = t_dict["ticket_id"]
             ticket.status = t_dict["status"]
             ticket.resolution_notes = t_dict.get("resolution_notes", "")
+            if t_dict.get("created_at"):
+                try:
+                    ticket.created_at = datetime.fromisoformat(t_dict["created_at"])
+                except Exception:
+                    pass
+            if t_dict.get("resolved_at"):
+                try:
+                    ticket.resolved_at = datetime.fromisoformat(t_dict["resolved_at"])
+                except Exception:
+                    pass
             if t_dict.get("assigned_to"):
                 admin_email = next((email for email, acc in accounts.items() if acc.username == t_dict["assigned_to"]), None)
                 admin_acc = accounts.get(admin_email)
@@ -403,12 +438,12 @@ def seed_data():
 
 @app.after_request
 def auto_save_to_db(response):
-    """Automatically persist state to MySQL after any modifying API request."""
+    """Automatically persist state to SQLite after any modifying API request."""
     if request.method in ["POST", "PUT", "DELETE"]:
         try:
             save_state_to_db()
         except Exception as e:
-            print("Auto-save state to MySQL failed:", e)
+            print("Auto-save state to SQLite failed:", e)
     return response
 
 # ── Auth Routes ───────────────────────────────────────────────────────────────
@@ -1398,7 +1433,7 @@ def api_admin_add_category():
     
     # Register the new category in both the active catalogue AND the serialization dictionary
     catalogue.add_category(new_cat)
-    store["categories"][cat_id] = new_cat  # <-- Add this line
+    store["categories"][cat_id] = new_cat
     
     return jsonify({"success": True, "category": new_cat.to_dict()}), 201
 

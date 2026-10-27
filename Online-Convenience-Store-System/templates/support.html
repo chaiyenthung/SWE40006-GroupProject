@@ -104,17 +104,17 @@ nav{
 </head>
 <body>
 <nav>
-  <a class="logo" href="/">🛒 ACE Mart</a>
+  <a class="logo" href="/">ACE Mart</a>
   <a class="back-btn" href="/">← Keep Shopping</a>
 </nav>
 
 <div class="page">
-  <div class="page-title">Help & Support 🎫</div>
+  <div class="page-title">Help & Support</div>
   <div class="page-sub">{{ customer.username }} &nbsp;·&nbsp; {{ tickets|length }} ticket(s)</div>
 
   <!-- Submit new ticket -->
   <div class="card">
-    <div class="card-title">✉️ Submit a Support Ticket</div>
+    <div class="card-title">Submit a Support Ticket</div>
 
     <div class="form-group">
       <label>Subject *</label>
@@ -138,7 +138,7 @@ nav{
       <span class="error-msg" id="err-desc">Description cannot be blank</span>
     </div>
 
-    <button class="submit-btn" onclick="submitTicket()">🎫 Submit Ticket</button>
+    <button class="submit-btn" onclick="submitTicket()">Submit Ticket</button>
   </div>
 
   <!-- Existing tickets -->
@@ -168,27 +168,27 @@ nav{
       <!-- Interactive Resolution Box -->
       {% if t.status == 'resolved' %}
         <div class="resolution">
-          <strong>✅ Resolution:</strong> {{ t.resolution_notes }}
+          <strong>Resolution:</strong> {{ t.resolution_notes }}
           <div style="margin-top: .65rem; text-align: right;">
             <!-- Reopen Ticket Action Button -->
             <button class="submit-btn" style="padding: .4rem 1rem; font-size: .78rem; background: var(--orange);" onclick="reopenTicket('{{ t.ticket_id }}')">
-              🔄 Reopen Ticket
+              Reopen Ticket
             </button>
           </div>
         </div>
       {% elif t.resolution_notes %}
         <div class="resolution">
-          <strong>✅ Resolution:</strong> {{ t.resolution_notes }}
+          <strong>Resolution:</strong> {{ t.resolution_notes }}
         </div>
       {% endif %}
       
       <div class="ticket-foot">
-        <span>📅 {{ t.created_at.strftime('%B %d, %Y') }}</span>
+        <span>{{ t.created_at.strftime('%B %d, %Y') }}</span>
         {% if t.assigned_to %}
-        <span>👤 Assigned to {{ t.assigned_to.username }}</span>
+        <span>Assigned to {{ t.assigned_to.username }}</span>
         {% endif %}
         {% if t.order %}
-        <span>🧾 Order #{{ t.order.order_id[:8].upper() }}</span>
+        <span>Order #{{ t.order.order_id[:8].upper() }}</span>
         {% endif %}
       </div>
     </div>
@@ -196,7 +196,6 @@ nav{
   </div>
   {% else %}
   <div class="empty">
-    <div class="big">🎫</div>
     <p>No support tickets yet. If you have an issue, submit one above.</p>
   </div>
   {% endif %}
@@ -233,13 +232,13 @@ async function submitTicket() {
   const data = await res.json();
 
   if (data.success) {
-    showToast('🎫 Ticket submitted! We\'ll get back to you soon.');
+    showToast('Ticket submitted! We\'ll get back to you soon.');
     document.getElementById('t-subject').value = '';
     document.getElementById('t-desc').value    = '';
     document.getElementById('t-order').value   = '';
     setTimeout(() => location.reload(), 1200);
   } else {
-    showToast('❌ ' + data.error, true);
+    showToast(data.error, true);
   }
 }
 
@@ -254,10 +253,10 @@ async function reopenTicket(ticketId) {
   });
   const data = await res.json();
   if (data.success) {
-    showToast('🔄 Ticket has been reopened successfully.');
+    showToast('Ticket has been reopened successfully.');
     setTimeout(() => location.reload(), 1000);
   } else {
-    showToast('❌ ' + data.error, true);
+    showToast(data.error, true);
   }
 }
 </script>

@@ -50,7 +50,7 @@ class Order:
         self.invoice = Invoice(
             invoice_id=str(uuid.uuid4()),
             order=self,
-            amount=grand_total,  # <-- Stores the grand total paid by the customer
+            amount=grand_total,
         )
         return self.invoice
 

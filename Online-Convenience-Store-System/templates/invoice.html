@@ -132,7 +132,7 @@ body {
 
 <div class="no-print-bar">
   <a class="back-link" href="/orders">← Back to My Orders</a>
-  <button class="print-btn" onclick="window.print()">🖨️ Print Invoice</button>
+  <button class="print-btn" onclick="window.print()">Print Invoice</button>
 </div>
 
 <div class="invoice-paper">
@@ -164,9 +164,9 @@ body {
       {% if payment %}
         <p><strong>Method:</strong> 
           {% if "CreditCard" in payment.gateway.gateway_name() %}
-            💳 Credit Card ({{ payment.gateway.card_number_masked }})
+            Credit Card ({{ payment.gateway.card_number_masked }})
           {% else %}
-            📱 E-Wallet ({{ payment.gateway.provider if payment.gateway.provider else 'TouchNGo' }})
+            E-Wallet ({{ payment.gateway.provider if payment.gateway.provider else 'TouchNGo' }})
           {% endif %}
         </p>
       {% else %}
@@ -187,7 +187,7 @@ body {
     <tbody>
       {% for item in order.items %}
       <tr>
-        <td>{{ item.product.image_url }} {{ item.product.name }}</td>
+        <td>{{ item.product.name }}</td>
         <td class="num">${{ "%.2f"|format(item.product.price) }}</td>
         <td class="num">{{ item.quantity }}</td>
         <td class="num">${{ "%.2f"|format(item.subtotal()) }}</td>

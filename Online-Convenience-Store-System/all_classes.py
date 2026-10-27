@@ -76,9 +76,9 @@ class Customer(Account):
                  phone="", address=""):
         super().__init__(account_id, username, email, password_hash)
         self.phone = phone
-        self.address = address # This acts as the currently active address
-        self.addresses: List[str] = [address] if address else []  #to initialize the address book with the signup address
+        self.address = address  # This acts as the currently active address
         self.addresses: List[str] = [address] if address else []  # Saved addresses
+        self.notifications: List[dict] = []
         self.shopping_cart: Optional[ShoppingCart] = None
         self.orders: List[Order] = []
         self.feedback_list: List[Feedback] = []
@@ -318,8 +318,7 @@ class Manager:
         r = Report(str(uuid.uuid4()), report_type, datetime.now(), data, requested_by, s_date, e_date)
         self.reports.append(r)
         return r
-    
-    # Add this method inside the Manager class
+
     def get_latest_report(self, report_type: str) -> Optional[Report]:
         """
         Traverses compiled reports in reverse chronological order
@@ -507,8 +506,15 @@ class ShoppingCart:
             return True
         return False
 
-    def add_product(self, p: Product, qty=1):
-        if not p.is_available(): return False
+    def add_product(self, p: Product, qty: int = 1, catalogue: Optional[Catalogue] = None) -> bool:
+        if catalogue is not None:
+            all_products = catalogue.all_products()
+            live_product = next((prod for prod in all_products if prod.product_id == p.product_id), None)
+            if live_product is None or not live_product.is_available():
+                return False
+        else:
+            if not p.is_available():
+                return False
         if p.product_id in self.items:
             self.items[p.product_id].quantity += qty
         else:
@@ -572,7 +578,7 @@ class Order:
         self.invoice = Invoice(
             invoice_id=str(uuid.uuid4()),
             order=self,
-            amount=grand_total,  # <-- Stores the grand total paid by the customer
+            amount=grand_total,
         )
         return self.invoice
 

@@ -116,12 +116,12 @@ nav{
 </head>
 <body>
 <nav>
-  <a class="logo" href="/">🛒 ACE Mart</a>
+  <a class="logo" href="/">ACE Mart</a>
   <a class="back-btn" href="/">← Store</a>
 </nav>
 
 <div class="page">
-  <div class="page-title">Profile Settings ⚙️</div>
+  <div class="page-title">Profile Settings</div>
   <div class="page-sub">{{ user.username }} &nbsp;·&nbsp; Member since {{ user.created_at.strftime('%B %Y') }}</div>
 
   <div class="grid {% if is_admin %}admin-profile{% endif %}">
