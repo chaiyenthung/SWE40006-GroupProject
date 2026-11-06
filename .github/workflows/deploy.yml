@@ -9,8 +9,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: chaiyenthung/swe40006-groupproject
-  TEST_APP_NAME: yls-test-cyt
-  PROD_APP_NAME: yls-prod-cyt
+  TEST_APP_NAME: ace-test-cyt
+  PROD_APP_NAME: ace-prod-cyt
 
 jobs:
   lint-and-test:
