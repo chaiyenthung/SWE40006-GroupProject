@@ -72,6 +72,7 @@ jobs:
     environment: TEST
     steps:
       - uses: azure/webapps-deploy@v2
+        id: deploy-to-webapp
         with:
           app-name: ${{ env.TEST_APP_NAME }}
           publish-profile: ${{ secrets.TESTING }}
@@ -79,8 +80,8 @@ jobs:
 
       - name: Smoke Test (Test Server)
         run: |
-          APP_URL="https://${{ env.TEST_APP_NAME }}.azurewebsites.net"
-          echo "Waiting for app to start and checking commit SHA..."
+          APP_URL="${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+          echo "Testing URL: $APP_URL"
           for i in {1..30}; do
             RESPONSE=$(curl -s "$APP_URL/version" || true)
             if echo "$RESPONSE" | grep -q "${{ github.sha }}"; then
@@ -99,6 +100,7 @@ jobs:
     environment: PRODUCTION
     steps:
       - uses: azure/webapps-deploy@v2
+        id: deploy-to-webapp
         with:
           app-name: ${{ env.PROD_APP_NAME }}
           publish-profile: ${{ secrets.PRODUCTION }}
@@ -106,7 +108,8 @@ jobs:
 
       - name: Smoke Test (Production Server)
         run: |
-          APP_URL="https://${{ env.PROD_APP_NAME }}.azurewebsites.net"
+          APP_URL="${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+          echo "Testing URL: $APP_URL"
           for i in {1..30}; do
             RESPONSE=$(curl -s "$APP_URL/version" || true)
             if echo "$RESPONSE" | grep -q "${{ github.sha }}"; then
