@@ -7,6 +7,7 @@ import json
 import uuid
 import hashlib
 from datetime import datetime
+import os 
 from flask import Flask, jsonify, render_template, request, abort, session, redirect, url_for
 
 from models import (
@@ -19,6 +20,14 @@ from models import (
 
 app = Flask(__name__)
 app.secret_key = "acemart-secret-2024"
+
+@app.route("/health")
+def health():
+    return jsonify(status="OK")
+
+@app.route("/version")
+def version():
+    return jsonify(sha=os.environ.get("GIT_SHA", "unknown"))
 
 SNACK_PRODUCTS = [
     ("p-001", "Truffle Chips",        "Black truffle & sea salt kettle chips",      4.99,  80, "🍟", "chips"),
