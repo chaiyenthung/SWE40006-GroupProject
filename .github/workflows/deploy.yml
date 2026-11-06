@@ -1,0 +1,117 @@
+name: Build and Deploy DevOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: chaiyenthung/swe40006-groupproject
+  TEST_APP_NAME: yls-test-cyt
+  PROD_APP_NAME: yls-prod-cyt
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Online-Convenience-Store-System/requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          flake8 Online-Convenience-Store-System --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Test with pytest
+        run: |
+          cd Online-Convenience-Store-System
+          pytest -v
+
+  build-and-push:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Online-Convenience-Store-System
+          push: true
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+  deploy-test:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: TEST
+    steps:
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.TEST_APP_NAME }}
+          publish-profile: ${{ secrets.TESTING }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+
+      - name: Smoke Test (Test Server)
+        run: |
+          APP_URL="https://${{ env.TEST_APP_NAME }}.azurewebsites.net"
+          echo "Waiting for app to start and checking commit SHA..."
+          for i in {1..30}; do
+            RESPONSE=$(curl -s "$APP_URL/version" || true)
+            if echo "$RESPONSE" | grep -q "${{ github.sha }}"; then
+              echo "New version is successfully running!"
+              exit 0
+            fi
+            echo "Waiting 10s... (attempt $i/30)"
+            sleep 10
+          done
+          echo "Smoke test failed: new commit not detected."
+          exit 1
+
+  deploy-prod:
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment: PRODUCTION
+    steps:
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.PROD_APP_NAME }}
+          publish-profile: ${{ secrets.PRODUCTION }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+
+      - name: Smoke Test (Production Server)
+        run: |
+          APP_URL="https://${{ env.PROD_APP_NAME }}.azurewebsites.net"
+          for i in {1..30}; do
+            RESPONSE=$(curl -s "$APP_URL/version" || true)
+            if echo "$RESPONSE" | grep -q "${{ github.sha }}"; then
+              echo "Production running updated commit!"
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
